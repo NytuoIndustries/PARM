@@ -743,7 +743,6 @@ end TCL_Generic;
       <a name="output" val="true"/>
       <a name="width" val="4"/>
     </comp>
-    <comp lib="1" loc="(330,80)" name="NOT Gate"/>
     <comp lib="1" loc="(360,130)" name="AND Gate">
       <a name="size" val="30"/>
     </comp>
@@ -755,6 +754,7 @@ end TCL_Generic;
     </comp>
     <comp lib="1" loc="(360,90)" name="OR Gate">
       <a name="inputs" val="3"/>
+      <a name="negate0" val="true"/>
       <a name="size" val="30"/>
     </comp>
     <comp lib="1" loc="(400,170)" name="OR Gate">
@@ -769,7 +769,7 @@ end TCL_Generic;
     <wire from="(260,180)" to="(330,180)"/>
     <wire from="(260,220)" to="(330,220)"/>
     <wire from="(260,80)" to="(260,180)"/>
-    <wire from="(260,80)" to="(300,80)"/>
+    <wire from="(260,80)" to="(320,80)"/>
     <wire from="(270,140)" to="(270,200)"/>
     <wire from="(270,140)" to="(320,140)"/>
     <wire from="(270,200)" to="(330,200)"/>
