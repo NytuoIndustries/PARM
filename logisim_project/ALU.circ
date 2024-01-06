@@ -824,7 +824,7 @@
       <a name="width" val="32"/>
     </comp>
     <comp lib="0" loc="(180,290)" name="Tunnel">
-      <a name="label" val="Shift"/>
+      <a name="label" val="shift"/>
       <a name="width" val="5"/>
     </comp>
     <comp lib="0" loc="(1810,1090)" name="Tunnel">
@@ -935,7 +935,7 @@
     </comp>
     <comp lib="0" loc="(400,290)" name="Tunnel">
       <a name="facing" val="east"/>
-      <a name="label" val="Shift"/>
+      <a name="label" val="shift"/>
       <a name="width" val="5"/>
     </comp>
     <comp lib="0" loc="(400,340)" name="Tunnel">
@@ -945,7 +945,7 @@
     </comp>
     <comp lib="0" loc="(400,380)" name="Tunnel">
       <a name="facing" val="east"/>
-      <a name="label" val="Shift"/>
+      <a name="label" val="shift"/>
       <a name="width" val="5"/>
     </comp>
     <comp lib="0" loc="(400,430)" name="Tunnel">
@@ -955,7 +955,7 @@
     </comp>
     <comp lib="0" loc="(400,470)" name="Tunnel">
       <a name="facing" val="east"/>
-      <a name="label" val="Shift"/>
+      <a name="label" val="shift"/>
       <a name="width" val="5"/>
     </comp>
     <comp lib="0" loc="(400,550)" name="Tunnel">
@@ -990,7 +990,7 @@
     </comp>
     <comp lib="0" loc="(400,810)" name="Tunnel">
       <a name="facing" val="east"/>
-      <a name="label" val="Shift"/>
+      <a name="label" val="shift"/>
       <a name="width" val="5"/>
     </comp>
     <comp lib="0" loc="(400,870)" name="Tunnel">
@@ -1216,6 +1216,7 @@
     <comp lib="1" loc="(1540,900)" name="AND Gate"/>
     <comp lib="1" loc="(1550,1280)" name="AND Gate"/>
     <comp lib="1" loc="(1550,1440)" name="AND Gate"/>
+    <comp lib="1" loc="(460,640)" name="NOT Gate"/>
     <comp lib="1" loc="(490,890)" name="AND Gate">
       <a name="width" val="32"/>
     </comp>
@@ -1223,9 +1224,6 @@
       <a name="width" val="32"/>
     </comp>
     <comp lib="1" loc="(520,170)" name="XOR Gate">
-      <a name="width" val="32"/>
-    </comp>
-    <comp lib="1" loc="(560,690)" name="NOT Gate">
       <a name="width" val="32"/>
     </comp>
     <comp lib="1" loc="(560,740)" name="NOT Gate"/>
@@ -1573,7 +1571,7 @@
     <wire from="(400,870)" to="(440,870)"/>
     <wire from="(400,910)" to="(440,910)"/>
     <wire from="(420,630)" to="(420,640)"/>
-    <wire from="(420,640)" to="(480,640)"/>
+    <wire from="(420,640)" to="(430,640)"/>
     <wire from="(450,250)" to="(450,260)"/>
     <wire from="(450,260)" to="(460,260)"/>
     <wire from="(450,280)" to="(450,290)"/>
@@ -1598,6 +1596,7 @@
     <wire from="(450,780)" to="(460,780)"/>
     <wire from="(450,800)" to="(450,810)"/>
     <wire from="(450,800)" to="(460,800)"/>
+    <wire from="(460,640)" to="(480,640)"/>
     <wire from="(480,530)" to="(480,550)"/>
     <wire from="(480,590)" to="(480,610)"/>
     <wire from="(480,610)" to="(590,610)"/>
@@ -1609,12 +1608,11 @@
     <wire from="(500,360)" to="(570,360)"/>
     <wire from="(500,450)" to="(570,450)"/>
     <wire from="(500,570)" to="(580,570)"/>
-    <wire from="(500,690)" to="(530,690)"/>
+    <wire from="(500,690)" to="(590,690)"/>
     <wire from="(500,790)" to="(570,790)"/>
     <wire from="(510,80)" to="(570,80)"/>
     <wire from="(520,170)" to="(570,170)"/>
     <wire from="(520,850)" to="(530,850)"/>
-    <wire from="(560,690)" to="(590,690)"/>
     <wire from="(560,740)" to="(650,740)"/>
     <wire from="(590,610)" to="(590,630)"/>
     <wire from="(590,630)" to="(660,630)"/>
