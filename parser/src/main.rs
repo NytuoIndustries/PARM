@@ -19,6 +19,7 @@ impl fmt::Display for AssemblerError {
         }
     }
 }
+
 #[derive(Debug)]
 enum AssemblerError {
     IoError(io::Error),
@@ -55,15 +56,36 @@ impl Assembler {
     }
 
     fn parse_register(s: &str) -> Result<i32> {
-        if !s.is_empty() && s.starts_with('r') {
-            let s = s[1..].parse::<i32>().map_err(|_| AssemblerError::ParseIntError)?;
-            Ok(s.into())
-        } else {
-            Err(AssemblerError::UnknownInstruction("register not parsed".to_string()))
-        }
+        let mut s = s.to_string();
+        Self::replace_all(&mut s, ",", "");
+        let s_upper = s.to_uppercase();
+        Ok(match s_upper.as_str() {
+            "R0" => 0b000,
+            "R1" => 0b001,
+            "R2" => 0b010,
+            "R3" => 0b011,
+            "R4" => 0b100,
+            "R5" => 0b101,
+            "R6" => 0b110,
+            "R7" => 0b111,
+            "R8" => 0b1000,
+            "R9" => 0b1001,
+            "R10" => 0b1010,
+            "R11" => 0b1011,
+            "R12" => 0b1100,
+            "R13" => 0b1101,
+            "R14" => 0b1110,
+            "R15" => 0b1111,
+            "SP" => 0b1101,
+            "LR" => 0b1110,
+            "PC" => 0b1111,
+            _ => return Err(AssemblerError::UnknownInstruction(format!("register not recognized: {}", s))),
+        })
     }
 
     fn parse_imm<T: FromStr + std::ops::Div<Output=T> + From<i32>>(s: &str, sp: bool) -> Result<T> {
+        let mut s = s.to_string();
+        Self::replace_all(&mut s, "]", "");
         if !s.is_empty() && s.starts_with('#') {
             let s = s[1..].parse::<i32>().map_err(|_| AssemblerError::ParseIntError)?;
             Ok(s.div(if sp { 4 } else { 1 }).into())
@@ -94,7 +116,7 @@ impl Assembler {
         };
         Ok(result.into())
     }
-    fn convert_instruction(instruction: &str, args: &[&str]) -> Result<i32> {
+    fn convert_instruction(instruction: &str, args: &[&str], pc: i32,labels: HashMap<String, i32>) -> Result<i32> {
         match instruction {
             "lsls" | "lsrs" => {
                 if args.len() == 3 {
@@ -118,7 +140,7 @@ impl Assembler {
                     Err(AssemblerError::UnknownInstruction("Invalid number of arguments".to_string()))
                 }
             }
-            "add" => {
+            "adds" => {
                 if args[0] != "sp" && args[1] != "sp" {
                     if args.len() == 3 && args[2].starts_with('#') {
                         // Immediate (3bits)
@@ -448,44 +470,53 @@ impl Assembler {
             }
 
             "b" | "bx" => {
-                if args.len() == 1 {
-                    // B <label>
-                    // 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0
-                    //  1  1  1  0  0                  imm11
-                    let imm11 = Self::parse_imm::<i32>(&args[0], false)?;
-                    Ok(0b11100_00000000000 | imm11)
-                } else {
-                    // BX <Rm>
-                    // 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0
-                    //  0  0  0  1  0  0 0 0 0 0 0 0 0 0 0 1
-                    let rm = Self::parse_register(&args[0])?;
-                    Ok(0b0001000000000001 | (rm << 3))
-                }
+                //jumps
+                // B <label>
+                // 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0
+                //  1  1  0  1  0                  imm11
+                let bitset = 0b11100_00000000000;
+                let label = Self::parse_label( &args[0], pc,labels)?;
+                Ok(bitset | label)
             }
             "bl" => {
                 // BL <label>
                 // 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0
                 //  1  1  1  0  1                  imm11
-                let imm11 = Self::parse_imm::<i32>(&args[0], false)?;
-                Ok(0b11101_00000000000 | imm11)
+                let bitset = 0b11100_00000000000;
+                let condition = Self::parse_condition(&args[0])?;
+                let label = Self::parse_label( &args[0], pc,labels)?;
+
+                Ok(bitset | condition | label)
             }
             "bic" => {
                 // BIC <Rdn > , <Rm>
                 // 15 14 13 12 11 10 9 8 7 6 | 5 4 3 | 2 1 0
                 //  0  1  0  0  0  0 1 1 0 0 |    Rm |    Rn
-                let rm = Self::parse_register(&args[1])?;
-                let rn = Self::parse_register(&args[0])?;
-                Ok(0b0100001100_000_000 | (rm << 3) | rn)
-            }
+                let bitset = 0b11100_00000000000;
+                let condition = Self::parse_condition(&args[0])?;
+                let label = Self::parse_label(&args[0], pc,labels)?;
 
+                Ok(bitset | condition | label)
+            }
+            "bne" => {
+                // BNE <label>
+                // 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0
+                //  1  1  0  1  1                  imm11
+                let imm11 = Self::parse_imm::<i32>(&args[0], false)?;
+                let bitset = 0b11100_00000000000;
+                let condition = Self::parse_condition(&args[0])?;
+                let label = Self::parse_label( &args[0], pc,labels)?;
+
+                Ok(bitset | condition | label)
+            }
 
             // Handle other instructions similarly
             _ => Err(AssemblerError::UnknownInstruction(format!("unknown instruction {}", instruction))),
         }
     }
 
-    fn parse_label(&self, s: &str, source: i32) -> Result<i32> {
-        let label = self.labels.get(s).ok_or(AssemblerError::LabelNotFound(s.to_string()))?;
+    fn parse_label(s: &str, source: i32,labels: HashMap<String, i32>) -> Result<i32> {
+        let label = labels.get(s).ok_or(AssemblerError::LabelNotFound(s.to_string()))?;
         Ok(label - source - 3)
     }
 }
@@ -526,26 +557,31 @@ fn main() -> io::Result<()> {
     }
     let input_file = File::open(&input_path)?;
     let reader = BufReader::new(input_file);
-    let mut assembler = Assembler::new();
-
     for line in reader.lines() {
         let line = line?;
-        if instruction_regex.is_match(&line) {
+        let mut line = line.replace("[", "");
+        line = line.replace("]", "");
+
+        println!("{}", line);
+        if line.starts_with("run") {
+            continue;
+        } else if line.starts_with("\t.") || line.starts_with(".") {
+            continue;
+        } else if line.is_empty() {
+            continue;
+        } else if line.starts_with("\t@") {
+            continue;
+        } else if instruction_regex.is_match(&line) {
             let words: Vec<&str> = line.split_whitespace().collect();
             let instruction = words[0];
             let args = &words[1..];
-            let instruction = Assembler::convert_instruction(instruction, args)
+            //pass labels as a copy to avoid borrowing issues
+            let instruction = Assembler::convert_instruction(instruction, args, pc, labels.clone())
                 .map_err(|e| io::Error::new(io::ErrorKind::Other, e.to_string()))?;
-            output_file.write_all(&instruction.to_le_bytes())?;
-        } else if label_regex.is_match(&line) {
-            let label = line.trim_end_matches(':');
-            assembler.labels.insert(label.to_string(), pc);
-        } else if line.starts_with('@') {
-            // Comment
-        } else if line.starts_with('.') {
-            // Directive
-        } else if line.is_empty() {
-            // Empty line
+            //in hexa
+            let hexa = format!("{:04X}", instruction);
+            output_file.write_all(hexa.as_bytes())?;
+            output_file.write_all(b" ")?;
         } else {
             return Err(io::Error::new(io::ErrorKind::InvalidInput, format!("Invalid line: {}", line)));
         }
