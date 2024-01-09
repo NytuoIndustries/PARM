@@ -262,7 +262,7 @@ impl Assembler {
                         //  0  0  0  0  0  0 1 0 1 0 |    Rm |    Rn
                         let rm = Self::parse_register(&args[1])?;
                         let rn = Self::parse_register(&args[0])?;
-                        Ok(0b0000001010_000_000 | (rm << 3) | rn)
+                        Ok(0b0100001010_000_000 | (rm << 3) | rn)
                     }
                 } else {
                     Err(AssemblerError::UnknownInstruction("Invalid number of arguments".to_string()))
@@ -431,7 +431,7 @@ impl Assembler {
                 //  1  0  0  1  0     Rt            imm8
                 let bits = 0b10010_000_00000000;
                 if args.len() >= 3 {
-                    let imm8 = Self::parse_imm::<i32>(&args[2], false)?;
+                    let imm8 = Self::parse_imm::<i32>(&args[2], false)?/4;
                     let rt = Self::parse_register(&args[0])?;
                     Ok(bits | (rt << 8) | imm8)
                 } else {
@@ -444,7 +444,7 @@ impl Assembler {
                 //  1  0  0  1  1     Rt            imm8
                 let bits = 0b10011_000_00000000;
                 if args.len() >= 3 {
-                    let imm8 = Self::parse_imm::<i32>(&args[2], false)?;
+                    let imm8 = Self::parse_imm::<i32>(&args[2], false)?/4;
                     let rt = Self::parse_register(&args[0])?;
                     Ok(bits | (rt << 8) | imm8)
                 } else {
@@ -482,7 +482,7 @@ impl Assembler {
                 // BL <label>
                 // 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0
                 //  1  1  1  0  1                  imm11
-                let bitset = 0b11100_00000000000;
+                let bitset = 0b11010_00000000000;
                 let condition = Self::parse_condition(&args[0])?;
                 let label = Self::parse_label( &args[0], pc,labels)?;
 
@@ -492,7 +492,7 @@ impl Assembler {
                 // BIC <Rdn > , <Rm>
                 // 15 14 13 12 11 10 9 8 7 6 | 5 4 3 | 2 1 0
                 //  0  1  0  0  0  0 1 1 0 0 |    Rm |    Rn
-                let bitset = 0b11100_00000000000;
+                let bitset = 0b11010_00000000000;
                 let condition = Self::parse_condition(&args[0])?;
                 let label = Self::parse_label(&args[0], pc,labels)?;
 
@@ -503,7 +503,7 @@ impl Assembler {
                 // 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0
                 //  1  1  0  1  1                  imm11
                 let imm11 = Self::parse_imm::<i32>(&args[0], false)?;
-                let bitset = 0b11100_00000000000;
+                let bitset = 0b11010_00000000000;
                 let condition = Self::parse_condition(&args[0])?;
                 let label = Self::parse_label( &args[0], pc,labels)?;
 
