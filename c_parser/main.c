@@ -7,11 +7,13 @@
 
 int pc;
 
-struct label
+typedef struct
 {
-    char* name;
-    int index;
-} labels[500];
+    char name[1024];
+    int pc;
+} label;
+
+label labels[1024];
 
 
 void replace_all(char* str, const char* what, const char* with)
@@ -53,9 +55,9 @@ uint16_t parserRegister(char* s)
     {
         char* substr = &s[1];
         int value = atoi(substr);
-        if (value >= 0 && value <= 8)
+        if (value >= 0 && value < 8)
         {
-            return (uint16_t)1 << value;
+            return (uint16_t)value;
         }
     }
     fprintf(stderr, "register not parsed\n");
@@ -122,40 +124,49 @@ uint16_t parseCondition(char* s)
 
 uint32_t operator_or(int T, int U, uint32_t b1, uint32_t b2)
 {
-    uint32_t mask = (1 << T) - 1; // mask to keep T bits
-    uint32_t mask2 = (1 << U) - 1; // mask to keep U bits
+    uint32_t mask = (1U << T) - 1; // mask to keep T bits
+    uint32_t mask2 = (1U << U) - 1; // mask to keep U bits
     return (b1 & mask) << U | (b2 & mask2);
 }
 
+void binprintf(int v)
+{
+    unsigned int mask=1<<((sizeof(int)<<3)-1);
+    while(mask) {
+        printf("%d", (v&mask ? 1 : 0));
+        mask >>= 1;
+    }
+    printf("\n");
+}
 
 uint16_t parseLabel(int T, const char* s, int source)
 {
-    int i;
-    for (i = 0; i < sizeof(labels) / sizeof(labels[0]); i++)
+    if (s != NULL)
     {
-        if (labels[i].name == NULL)
+        for (int i = 0; i < sizeof(labels) / sizeof(label); i++)
         {
-            continue;
+            if (strcmp(s, labels[i].name) == 0)
+            {
+                printf("%d\n", labels[i].pc);
+                printf("%d\n", source);
+                int r = labels[i].pc - source - 3;
+                printf("%d\n", r);
+                binprintf(r);
+
+                if (r >= -(1 << (T - 1)) && r < (1 << (T - 1)))
+                {
+                    return (uint16_t)r;
+                }
+                else
+                {
+                    fprintf(stderr, "label out of range\n");
+                    exit(EXIT_FAILURE);
+                }
+            }
         }
-        if (strcmp(labels[i].name, s) == 0)
-        {
-            break;
-        }
     }
-    if (i == sizeof(labels) / sizeof(labels[0]))
-    {
-        fprintf(stderr, "Label not found\n");
-        exit(EXIT_FAILURE);
-    }
-    int index = labels[i].index - source - 3;
-    uint16_t bitset = 0;
-    uint16_t mask = (1 << T) - 1; // mask to keep T bits
-    for (int i = 0; i < T; i++)
-    {
-        // loop only T times
-        bitset |= ((index >> i) & 1) << i;
-    }
-    return bitset & mask; // apply mask to keep T bits
+    fprintf(stderr, "label not parsed\n");
+    exit(EXIT_FAILURE);
 }
 
 int execute_regex(char* regex, char* instruction)
@@ -268,13 +279,14 @@ uint16_t convert_instruction(char* instruction, char** args, int args_size)
         {
             if (args[1][0] == '#')
             {
-                return 0b0011100000000000 |
+                printf("movs %s\n", args[1]);
+                // print in binary
+                binprintf(parseImm(8, args[1], 0));
+                binprintf( (parserRegister(args[0])<<8));
+                return (uint16_t) 0b0010000000000000 |
                     parserRegister(args[0]) << 8 |
                     parseImm(8, args[1], 0);
             }
-            return 0b0100011000000000 |
-                parserRegister(args[1]) << 3 |
-                parserRegister(args[0]);
         }
     }
     else if (execute_regex("^cmp$", instruction))
@@ -427,8 +439,11 @@ uint16_t convert_instruction(char* instruction, char** args, int args_size)
     {
         if (strcmp(instruction, "b") == 0 || strcmp(instruction, "bx") == 0)
         {
+            printf("arg %s\n", args[0]);
+            binprintf( parseLabel(11, args[0], pc));
             return 0b1110000000000000 | parseLabel(11, args[0], pc);
         }
+        binprintf( parseLabel(8, args[0], pc));
         return 0b1101000000000000 | parseCondition(instruction + 1) << 8 | parseLabel(8, args[0], pc);
     }
 
@@ -503,9 +518,8 @@ int main(int argc, char** argv)
                     if (execute_regex(labelRegex, line) && !execute_regex("run:", line))
                     {
                         char* label = strtok(line, ":");
-                        labels[pc].name = malloc(strlen(label) + 1);
+                        labels[pc].pc = pc;
                         strcpy(labels[pc].name, label);
-                        labels[pc].index = pc;
                         pc++;
                         printf("label: %s(%d)\n", labels[pc - 1].name, pc - 1);
                     }
@@ -561,7 +575,6 @@ int main(int argc, char** argv)
                 }
 
                 fprintf(out, "\n");
-
                 printf("avengers assembled in %s\n", outFile);
             }
             else
