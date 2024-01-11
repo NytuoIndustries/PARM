@@ -5,12 +5,12 @@
 #include <ctype.h>
 #include <regex.h>
 
-int pc;
+int pc = 0;
 
 typedef struct
 {
     char name[1024];
-    int pc;
+    int index;
 } label;
 
 label labels[1024];
@@ -141,15 +141,22 @@ void binprintf(int v)
 
 uint16_t parseLabel(int T, const char* s, int source)
 {
+    // TODO ça doit casser par là
+    /*DDF.LBB0_1
+    DDF0
+    DDe
+    DDffffffef
+    DD11111101111
+    e7ef*/
     if (s != NULL)
     {
         for (int i = 0; i < sizeof(labels) / sizeof(label); i++)
         {
             if (strcmp(s, labels[i].name) == 0)
             {
-                printf("%d\n", labels[i].pc);
+                printf("%d\n", labels[i].index);
                 printf("%d\n", source);
-                int r = labels[i].pc - source - 3;
+                int r = labels[i].index - source - 3;
                 printf("%d\n", r);
                 binprintf(r);
 
@@ -443,7 +450,6 @@ uint16_t convert_instruction(char* instruction, char** args, int args_size)
             binprintf( parseLabel(11, args[0], pc));
             return 0b1110000000000000 | parseLabel(11, args[0], pc);
         }
-        binprintf( parseLabel(8, args[0], pc));
         return 0b1101000000000000 | parseCondition(instruction + 1) << 8 | parseLabel(8, args[0], pc);
     }
 
@@ -518,18 +524,13 @@ int main(int argc, char** argv)
                     if (execute_regex(labelRegex, line) && !execute_regex("run:", line))
                     {
                         char* label = strtok(line, ":");
-                        labels[pc].pc = pc;
+                        labels[pc].index = pc;
                         strcpy(labels[pc].name, label);
-                        pc++;
-                        printf("label: %s(%d)\n", labels[pc - 1].name, pc - 1);
+                        printf("label: %s(%d)\n", labels[pc].name, labels[pc].index);
                     }
                     else if (execute_regex(instructionRegex, line))
                     {
-                        pc++;
-                    }
-                    for (int i = 0; i < sizeof(line); i++)
-                    {
-                        line[i] = '\0';
+                        ++pc;
                     }
                 }
 
@@ -570,7 +571,7 @@ int main(int argc, char** argv)
                         }
                         printf(")\n");
 
-                        pc++;
+                        ++pc;
                     }
                 }
 
