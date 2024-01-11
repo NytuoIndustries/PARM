@@ -5,3 +5,4 @@ code_c/draft
 out/
 *.gz
 parser/target/*
+c_parser/cmake-build-debug/*
