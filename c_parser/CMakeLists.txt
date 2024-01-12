@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.28)
+cmake_minimum_required(VERSION 3.26)
 project(avengers_age_of_c C)
 
 set(CMAKE_C_STANDARD 99)
