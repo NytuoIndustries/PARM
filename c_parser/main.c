@@ -48,6 +48,7 @@ uint16_t parserRegister(char *s) {
         char *substr = &s[1];
         int value = atoi(substr);
         if (value >= 0 && value < 8) {
+            printf("register: %b\n", value);
             return (uint16_t) value;
         }
     }
@@ -60,6 +61,7 @@ uint16_t parseImm(int T, char *s, int sp) {
         char *substr = &s[1];
         int value = atoi(substr) / (sp ? 4 : 1);
         if (value >= 0 && value < (1 << T)) {
+            printf("register: %b\n", value);
             return (uint16_t) value;
         }
     }
@@ -155,19 +157,19 @@ uint16_t convert_instruction(char *instruction, char **args, int args_size) {
                    parserRegister(args[0]);
         }
         if (args_size == 2) {
-            return 0b0100000000000000 |
+            return 0b0100000010000000 |
                    parserRegister(args[1]) << 3 |
                    parserRegister(args[0]);
         }
     } else if (execute_regex("^lsrs?$", instruction)) {
         if (args_size == 3) {
-            return 0b0000100000000000 |
+            return 0b0000100010000000 |
                    parserRegister(args[2]) << 6 |
                    parserRegister(args[1]) << 3 |
                    parserRegister(args[0]);
         }
         if (args_size == 2) {
-            return 0b0100000100000000 |
+            return 0b0100000011000000 |
                    parserRegister(args[1]) << 3 |
                    parserRegister(args[0]);
         }
@@ -179,27 +181,45 @@ uint16_t convert_instruction(char *instruction, char **args, int args_size) {
                    parserRegister(args[0]);
         }
     } else if (execute_regex("^adds?$", instruction)) {
+        printf("ADD DETECTED\n");
+        for (int i = 0; i < args_size; i++) {
+            printf("arg %s\n", args[i]);
+        }
         if (strcmp(args[0], "sp") != 0 && strcmp(args[1], "sp") != 0) {
             if (args_size == 3 && args[2][0] == 'r') {
                 return 0b0001100000000000 |
                        parserRegister(args[2]) << 6 |
-                       parserRegister(args[1]) << 3 |
+                       parserRegister(args[1]) << 3|
                        parserRegister(args[0]);
             }
             if (args_size == 3 && args[2][0] == '#') {
-                return 0b0011000000000000 |
+                return 0b0001110000000000 |
+                        parseImm(3, args[2], 0) << 6 |
+                        parseImm(3, args[1], 0) << 3 |
+                        parseImm(3, args[0], 0);
+                /*
                        parserRegister(args[0]) << 8 |
-                       parseImm(8, args[2], 0);
+                       parseImm(8, args[args_size - 1], 0);
+*/
             }
-            return 0b0001110000000000 |
-                   parserRegister(args[1]) << 6 |
-                   parserRegister(args[0]) << 3 |
-                   parserRegister(args[0]);
+            return 0b0001100000000000 |
+
+                    parserRegister(args[0]) << 8 |
+                    parseImm(8, args[args_size - 1], 0);
+
+                    /*
+                   parserRegister(args[2]) << 6 |
+                   parserRegister(args[1]) << 3 |
+                   parserRegister(args[0]);*/
+
         }
         if (strcmp(args[0], "sp") == 0) {
             return 0b1011000000000000 |
-                   parseImm(7, args[2], 1);
+                   parseImm(7, args[args_size-1], 1);
         }
+        // if rd sp imm8
+        return 0b1011000010000000 |
+               parseImm(7, args[2], 1);
     } else if (execute_regex("^subs?$", instruction)) {
         if (args_size == 3) {
             if (args[2][0] == '#') {
@@ -233,7 +253,13 @@ uint16_t convert_instruction(char *instruction, char **args, int args_size) {
                        parserRegister(args[0]) << 8 |
                        parseImm(8, args[1], 0);
             }
+            else{
+                return (uint16_t) 0b0000000000000000 |
+                       parserRegister(args[1]) << 3 |
+                       parserRegister(args[0]);
+            }
         }
+        
     } else if (execute_regex("^cmp$", instruction)) {
         if (args[1][0] == '#') {
             return 0b0010100000000000 |
@@ -338,8 +364,10 @@ uint16_t convert_instruction(char *instruction, char **args, int args_size) {
             return (uint16_t) (0b1110000000000000 | parseLabel(11, args[0], pc));
         }
         return 0b1101000000000000 | parseCondition(instruction + 1) << 8 | parseLabel(8, args[0], pc);
+    } else if (execute_regex("^push$", instruction)) {
+        printf("Skipping push\n");
+        return 0b0000000000000000;
     }
-
     fprintf(stderr, "instruction not recognized: %s\n", instruction);
     exit(EXIT_FAILURE);
 }
@@ -380,7 +408,7 @@ void trim(char *str) {
 int main(int argc, char **argv) {
     char *labelRegex = ("^.*:$");
     char *instructionRegex = (
-            "^[add|sub|mov|cmp|and|eor|lsl|lsr|asr|adc|sbc|ror|tst|rsb|cmn|orr|mul|bic|mvn|str|ldr|b|bx|beq|bne|bcs|bcc|bmi|bpl|bvs|bvc|bhi|bls|bge|blt|bgt|ble].*$");
+            "^[add|sub|mov|cmp|and|eor|lsl|lsr|asr|adc|sbc|ror|tst|rsb|cmn|orr|mul|bic|mvn|str|ldr|push|b|bx|beq|bne|bcs|bcc|bmi|bpl|bvs|bvc|bhi|bls|bge|blt|bgt|ble].*$");
     if (argc > 1) {
         char *inFile = argv[1];
         char *extensionRegex = ("^(.*)[.]s$");
