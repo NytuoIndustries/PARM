@@ -4,6 +4,7 @@
 
   <lib desc="#Wiring" name="0">
     <tool name="Splitter">
+      <a name="facing" val="south"/>
       <a name="fanout" val="4"/>
       <a name="incoming" val="1"/>
     </tool>
@@ -392,13 +393,9 @@ end type_architecture;
       <a name="facing" val="east"/>
       <a name="label" val="C"/>
     </comp>
-    <comp lib="0" loc="(580,260)" name="Constant"/>
     <comp lib="0" loc="(580,290)" name="Tunnel">
       <a name="facing" val="east"/>
       <a name="label" val="C"/>
-    </comp>
-    <comp lib="0" loc="(580,330)" name="Constant">
-      <a name="value" val="0x0"/>
     </comp>
     <comp lib="0" loc="(580,80)" name="Tunnel">
       <a name="facing" val="east"/>
@@ -469,42 +466,31 @@ end type_architecture;
     <comp lib="0" loc="(960,410)" name="Tunnel">
       <a name="label" val="GT"/>
     </comp>
-    <comp lib="0" loc="(980,110)" name="Constant"/>
     <comp lib="0" loc="(980,140)" name="Tunnel">
       <a name="facing" val="east"/>
       <a name="label" val="N"/>
-    </comp>
-    <comp lib="0" loc="(980,180)" name="Constant">
-      <a name="value" val="0x0"/>
     </comp>
     <comp lib="0" loc="(980,210)" name="Tunnel">
       <a name="facing" val="east"/>
       <a name="label" val="V"/>
     </comp>
-    <comp lib="0" loc="(980,250)" name="Constant"/>
     <comp lib="0" loc="(980,280)" name="Tunnel">
       <a name="facing" val="east"/>
       <a name="label" val="V"/>
-    </comp>
-    <comp lib="0" loc="(980,320)" name="Constant">
-      <a name="value" val="0x0"/>
     </comp>
     <comp lib="0" loc="(980,70)" name="Tunnel">
       <a name="facing" val="east"/>
       <a name="label" val="N"/>
     </comp>
-    <comp lib="1" loc="(1090,230)" name="AND Gate"/>
-    <comp lib="1" loc="(1090,90)" name="AND Gate"/>
-    <comp lib="1" loc="(1110,160)" name="XNOR Gate"/>
-    <comp lib="1" loc="(1110,300)" name="XNOR Gate"/>
+    <comp lib="1" loc="(1110,160)" name="NOT Gate"/>
+    <comp lib="1" loc="(1110,300)" name="NOT Gate"/>
     <comp lib="1" loc="(1250,410)" name="OR Gate"/>
     <comp lib="1" loc="(1450,320)" name="NOT Gate"/>
     <comp lib="1" loc="(1470,100)" name="AND Gate"/>
     <comp lib="1" loc="(1470,180)" name="OR Gate"/>
     <comp lib="1" loc="(1490,260)" name="XNOR Gate"/>
-    <comp lib="1" loc="(690,240)" name="AND Gate"/>
     <comp lib="1" loc="(710,170)" name="NOT Gate"/>
-    <comp lib="1" loc="(710,310)" name="XNOR Gate"/>
+    <comp lib="1" loc="(710,310)" name="NOT Gate"/>
     <comp lib="1" loc="(710,600)" name="OR Gate">
       <a name="size" val="30"/>
     </comp>
@@ -519,8 +505,14 @@ end type_architecture;
     <comp lib="2" loc="(830,800)" name="Multiplexer">
       <a name="width" val="11"/>
     </comp>
-    <wire from="(1090,230)" to="(1170,230)"/>
-    <wire from="(1090,90)" to="(1170,90)"/>
+    <wire from="(1040,140)" to="(1040,160)"/>
+    <wire from="(1040,160)" to="(1080,160)"/>
+    <wire from="(1040,210)" to="(1040,230)"/>
+    <wire from="(1040,230)" to="(1170,230)"/>
+    <wire from="(1040,280)" to="(1040,300)"/>
+    <wire from="(1040,300)" to="(1080,300)"/>
+    <wire from="(1040,70)" to="(1040,90)"/>
+    <wire from="(1040,90)" to="(1170,90)"/>
     <wire from="(1110,160)" to="(1170,160)"/>
     <wire from="(1110,300)" to="(1170,300)"/>
     <wire from="(1140,390)" to="(1200,390)"/>
@@ -601,21 +593,22 @@ end type_architecture;
     <wire from="(540,590)" to="(680,590)"/>
     <wire from="(580,150)" to="(640,150)"/>
     <wire from="(580,220)" to="(640,220)"/>
-    <wire from="(580,260)" to="(640,260)"/>
-    <wire from="(580,290)" to="(640,290)"/>
-    <wire from="(580,330)" to="(640,330)"/>
+    <wire from="(580,290)" to="(670,290)"/>
     <wire from="(580,80)" to="(640,80)"/>
     <wire from="(640,100)" to="(770,100)"/>
     <wire from="(640,150)" to="(640,170)"/>
     <wire from="(640,170)" to="(680,170)"/>
+    <wire from="(640,220)" to="(640,240)"/>
+    <wire from="(640,240)" to="(770,240)"/>
     <wire from="(640,640)" to="(650,640)"/>
     <wire from="(640,80)" to="(640,100)"/>
     <wire from="(640,840)" to="(730,840)"/>
     <wire from="(650,610)" to="(650,640)"/>
     <wire from="(650,610)" to="(680,610)"/>
     <wire from="(650,800)" to="(680,800)"/>
+    <wire from="(670,290)" to="(670,310)"/>
+    <wire from="(670,310)" to="(680,310)"/>
     <wire from="(680,580)" to="(680,590)"/>
-    <wire from="(690,240)" to="(770,240)"/>
     <wire from="(710,170)" to="(770,170)"/>
     <wire from="(710,310)" to="(770,310)"/>
     <wire from="(710,600)" to="(760,600)"/>
@@ -644,13 +637,9 @@ end type_architecture;
     <wire from="(840,590)" to="(840,830)"/>
     <wire from="(840,590)" to="(880,590)"/>
     <wire from="(880,410)" to="(960,410)"/>
-    <wire from="(980,110)" to="(1040,110)"/>
     <wire from="(980,140)" to="(1040,140)"/>
-    <wire from="(980,180)" to="(1040,180)"/>
     <wire from="(980,210)" to="(1040,210)"/>
-    <wire from="(980,250)" to="(1040,250)"/>
     <wire from="(980,280)" to="(1040,280)"/>
-    <wire from="(980,320)" to="(1040,320)"/>
     <wire from="(980,70)" to="(1040,70)"/>
   </circuit>
 </project>
