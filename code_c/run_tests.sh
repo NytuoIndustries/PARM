@@ -4,7 +4,7 @@ chmod +x $the_c_file
 
 for the_s_file in $findalltheS
 do
-    ./$the_c_file $the_s_file
+    $the_c_file $the_s_file
 done
  
 
