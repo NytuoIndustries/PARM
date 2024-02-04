@@ -1291,21 +1291,6 @@
     <comp lib="3" loc="(2480,290)" name="Comparator">
       <a name="width" val="32"/>
     </comp>
-    <comp lib="3" loc="(390,1840)" name="Negator">
-      <a name="width" val="32"/>
-    </comp>
-    <comp lib="3" loc="(390,1850)" name="Negator">
-      <a name="width" val="32"/>
-    </comp>
-    <comp lib="3" loc="(390,1850)" name="Negator">
-      <a name="width" val="32"/>
-    </comp>
-    <comp lib="3" loc="(400,1850)" name="Negator">
-      <a name="width" val="32"/>
-    </comp>
-    <comp lib="3" loc="(400,1850)" name="Negator">
-      <a name="width" val="32"/>
-    </comp>
     <comp lib="3" loc="(500,270)" name="Shifter">
       <a name="width" val="32"/>
     </comp>
